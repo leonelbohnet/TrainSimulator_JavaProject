@@ -22,18 +22,51 @@ public class AnimatedTrain {
 
     }
 
+//    public double getProgress() {
+//        LocalTime now = LocalTime.now();
+//        LocalTime dep = departureTime.toLocalTime();
+//        LocalTime arr = arrivalTime.toLocalTime();
+//
+//
+//        if (now.isBefore(dep)) return 0.0;
+//        if (now.isAfter(arr)) return 1.0;
+//
+//        long totalDuration = Duration.between(dep, arr).toMillis();
+//        long elapsedDuration = Duration.between(dep, now).toMillis();
+//
+//        if (totalDuration <= 0) return 1.0;
+//
+//        double scaledElapsed = (double) elapsedDuration * 60;
+//
+//        double progress = (double) (scaledElapsed * 60) / totalDuration;
+//
+//        return Math.max(0.0, Math.min(1.0, progress));
+//    }
+
     public double getProgress() {
         LocalTime now = LocalTime.now();
+
+        long nowInHour = (now.getMinute() * 60) + now.getSecond();
+
         LocalTime dep = departureTime.toLocalTime();
         LocalTime arr = arrivalTime.toLocalTime();
 
+        long depInHour = (departureTime.getMinute() * 60) + departureTime.getSecond();
+        long arrInHour = (arrivalTime.getMinute() * 60) + arrivalTime.getSecond();
 
-        if (now.isBefore(dep)) return 0.0;
-        if (now.isAfter(arr)) return 1.0;
+        if (nowInHour < depInHour) return 0.0;
+        if (nowInHour > arrInHour) return 1.0;
 
-        long totalDuration = Duration.between(departureTime, arrivalTime).toMillis();
-        long elapsedDuration = Duration.between(departureTime, now).toMillis();
-        return (double) elapsedDuration / totalDuration;
+        long totalDuration = arrInHour - depInHour;
+        long elapsed = nowInHour - depInHour;
+
+        if (totalDuration <= 0) return 1.0;
+
+        // 4. Skalierung (Faktor 60)
+        // Da wir jetzt in "Simulator-Minuten" rechnen, ist der Fortschritt:
+        double progress = (double) (elapsed * 1) / totalDuration;
+
+        return Math.max(0.0, Math.min(1.0, progress));
     }
 
     public Point2D.Double getCurrentPosition() {

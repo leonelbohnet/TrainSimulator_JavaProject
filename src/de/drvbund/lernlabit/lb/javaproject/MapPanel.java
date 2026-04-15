@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,8 +20,6 @@ public class MapPanel extends JPanel {
     private TripDAO tripDAO = new TripDAO();
 
 
-
-
     public MapPanel(List<Station> stations, List<TrackSegment> segments) {
         this.segments = segments;
         this.stationMap = stations.stream().collect(Collectors.toMap(Station::getId, s -> s));
@@ -29,7 +28,7 @@ public class MapPanel extends JPanel {
         animationTimer = new Timer(16, e -> repaint());
         animationTimer.start();
 
-        dataRefreshTimer = new Timer (5000, e -> {
+        dataRefreshTimer = new Timer(1000, e -> {
             this.activeTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
         });
         dataRefreshTimer.start();
@@ -45,12 +44,12 @@ public class MapPanel extends JPanel {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (TrackSegment segment : segments){
+        for (TrackSegment segment : segments) {
             Station stationA = stationMap.get(segment.getStationAID());
             Station stationB = stationMap.get(segment.getStationBID());
 
-            if (stationA != null && stationB != null){
-                if(segment.getIsIceAllowed()){
+            if (stationA != null && stationB != null) {
+                if (segment.getIsIceAllowed()) {
                     g2d.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                     g2d.setColor(new Color(0, 128, 255));
                 } else {
@@ -75,14 +74,22 @@ public class MapPanel extends JPanel {
 
 
         }
-        for (AnimatedTrain train : activeTrains) {
-            Point2D.Double position = train.getCurrentPosition();
-            g2d.setColor(Color.RED);
-            g2d.fill(new Ellipse2D.Double(position.x - 6, position.y - 6, 12, 12));
+        Iterator<AnimatedTrain> iter = activeTrains.iterator();
+        while (iter.hasNext()) {
+            AnimatedTrain train = iter.next();
+            double progress = train.getProgress();
 
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(new Font("Aptos", Font.PLAIN, 12));
-            g2d.drawString(train.getName(), (int) position.x + 10, (int) position.y -5);
+            // Wenn der skalierte Fortschritt 1.0 erreicht hat -> Zug entfernen
+            if (progress >= 1.0) {
+                iter.remove();
+                continue; // Springe zum nächsten Zug, zeichne diesen nicht mehr
+            }
+
+            // Nur wenn progress < 1.0 ist, wird der Zug gezeichnet
+            Point2D.Double pos = train.getCurrentPosition();
+            g.setColor(Color.RED);
+            g.fillOval((int) pos.x - 5, (int) pos.y - 5, 10, 10);
+            g.drawString(train.getName(), (int) pos.x + 10, (int) pos.y);
         }
     }
 

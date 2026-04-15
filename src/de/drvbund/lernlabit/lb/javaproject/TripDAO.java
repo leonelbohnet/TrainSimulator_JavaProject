@@ -14,7 +14,9 @@ public class TripDAO {
         String sql = "SELECT t.name, tr.start_station_id, tr.end_station_id, " +
                 "tr.scheduled_departure, tr.scheduled_arrival " +
                 "FROM trips tr JOIN trains t ON tr.train_id = t.id " +
-                "WHERE TIME(?) BETWEEN TIME(tr.scheduled_departure) AND TIME(tr.scheduled_arrival)";
+                "WHERE (TIME_TO_SEC(TIME(?)) % 3600) " +
+                "BETWEEN (TIME_TO_SEC(TIME(tr.scheduled_departure)) % 3600) " +
+                "AND (TIME_TO_SEC(TIME(tr.scheduled_arrival)) % 3600)";
 
         try (Connection connection = DatabaseManager.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
