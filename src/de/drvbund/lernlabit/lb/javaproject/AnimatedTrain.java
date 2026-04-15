@@ -12,41 +12,37 @@ public class AnimatedTrain {
     private Station endStation;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
+    private int finalStationId;
 
-    public AnimatedTrain(String name, Station startStation, Station endStation, LocalDateTime departureTime, LocalDateTime arrivalTime) {
+    public AnimatedTrain(String name, Station startStation, Station endStation, LocalDateTime departureTime, LocalDateTime arrivalTime, int finalStationId) {
         this.name = name;
         this.startStation = startStation;
         this.endStation = endStation;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
+        this.finalStationId = finalStationId;
 
     }
 
     public double getProgress() {
         LocalTime simTime = SimulationController.getInstance().getVirtualTime();
-
-        // Aktuelle Position in der Stunde (0 - 3599 Sekunden)
         long nowInHour = (simTime.getMinute() * 60) + simTime.getSecond();
 
         LocalTime dep = departureTime.toLocalTime();
         LocalTime arr = arrivalTime.toLocalTime();
 
-        // Geplante Zeiten in der Stunde
         long depInHour = (dep.getMinute() * 60) + dep.getSecond();
         long arrInHour = (arr.getMinute() * 60) + arr.getSecond();
-
-        // Falls die aktuelle Sim-Zeit noch vor der Abfahrtsminute liegt
-        if (nowInHour < depInHour) return 0.0;
-        // Falls sie schon nach der Ankunftsminute liegt
-        if (nowInHour > arrInHour) return 1.0;
 
         long totalDuration = arrInHour - depInHour;
         long elapsed = nowInHour - depInHour;
 
         if (totalDuration <= 0) return 1.0;
 
+        double progress = (double) elapsed / totalDuration;
+
         // Fortschritt berechnen (Die Beschleunigung steckt bereits im SimulationController)
-        return (double) elapsed / totalDuration;
+        return Math.max(0.0, Math.min(1.0, progress));
     }
 
     public Point2D.Double getCurrentPosition() {
@@ -56,8 +52,39 @@ public class AnimatedTrain {
         return new Point2D.Double(x, y);
     }
 
+    public void updateSegment(Station newStart, Station newEnd, LocalDateTime newDeparture, LocalDateTime newArrival){
+        this.startStation = newStart;
+        this.endStation = newEnd;
+        this.departureTime = newDeparture;
+        this.arrivalTime = newArrival;
+    }
+
+    public boolean isAtFinalDestination(){
+        return endStation.getId() == finalStationId && getProgress() >= 1.0;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public Station getStartStation() {
+        return startStation;
+    }
+
+    public Station getEndStation() {
+        return endStation;
+    }
+
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
+    }
+
+    public LocalDateTime getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public int getFinalStationId(){
+        return finalStationId;
     }
 
 }

@@ -33,9 +33,31 @@ public class MapPanel extends JPanel {
         });
         animationTimer.start();
 
-        dataRefreshTimer = new Timer(5000/(int) SimulationController.getInstance().getSpeedFactor(), e -> {
-            this.activeTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
+        dataRefreshTimer = new Timer(500, e -> {
+            List<AnimatedTrain> sqlTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
+
+            // 1. Neue Segmente in bestehende Züge einspielen
+            for (AnimatedTrain nt : sqlTrains) {
+                boolean found = false;
+                for (AnimatedTrain existing : activeTrains) {
+                    if (existing.getName().equals(nt.getName())) {
+                        existing.updateSegment(nt.getStartStation(), nt.getEndStation(), nt.getDepartureTime(), nt.getArrivalTime());
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) activeTrains.add(nt);
+            }
+
+            // 2. NUR löschen, wenn der Zug im SQL fehlt UND am Ziel ist
+            activeTrains.removeIf(train -> {
+                boolean inSql = sqlTrains.stream().anyMatch(nt -> nt.getName().equals(train.getName()));
+                // Wenn er nicht im SQL ist, aber noch nicht am Endbahnhof, behalten wir ihn!
+                // So überbrücken wir die "Lücke" im SQL beim Umspringen.
+                return !inSql && train.isAtFinalDestination();
+            });
         });
+
         dataRefreshTimer.start();
 
         setPreferredSize(new Dimension(800, 600));
@@ -79,18 +101,9 @@ public class MapPanel extends JPanel {
 
 
         }
-        Iterator<AnimatedTrain> iter = activeTrains.iterator();
-        while (iter.hasNext()) {
-            AnimatedTrain train = iter.next();
+        for (AnimatedTrain train : activeTrains){
             double progress = train.getProgress();
 
-            // Wenn der skalierte Fortschritt 1.0 erreicht hat -> Zug entfernen
-            if (progress >= 1.0) {
-                iter.remove();
-                continue; // Springe zum nächsten Zug, zeichne diesen nicht mehr
-            }
-
-            // Nur wenn progress < 1.0 ist, wird der Zug gezeichnet
             Point2D.Double pos = train.getCurrentPosition();
             g.setColor(Color.RED);
             g.fillOval((int) pos.x - 5, (int) pos.y - 5, 10, 10);

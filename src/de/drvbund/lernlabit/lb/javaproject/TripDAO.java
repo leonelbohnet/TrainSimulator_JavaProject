@@ -16,9 +16,11 @@ public class TripDAO {
 
         // SQL Query: Wir vergleichen nur die Uhrzeit (TIME)
         // Der Filter stellt sicher, dass der Zug bereits abgefahren, aber noch nicht angekommen ist.
+        // Wir nutzen >= und < statt BETWEEN, um Überschneidungen an den Grenzen zu vermeiden
         String sql = "SELECT t.name AS train_name, rs.from_station_id, rs.to_station_id, " +
                 "ADDTIME(se.departure_time, SEC_TO_TIME(rs.offset_minutes * 60)) AS segment_dep, " +
-                "ADDTIME(se.departure_time, SEC_TO_TIME((rs.offset_minutes + rs.duration_minutes) * 60)) AS segment_arr " +
+                "ADDTIME(se.departure_time, SEC_TO_TIME((rs.offset_minutes + rs.duration_minutes) * 60)) AS segment_arr, " +
+                "(SELECT rs2.to_station_id FROM route_segments rs2 WHERE rs2.route_id = se.route_id ORDER BY rs2.stop_order DESC LIMIT 1) AS final_station_id " +
                 "FROM schedule_entries se " +
                 "JOIN trains t ON se.train_id = t.id " +
                 "JOIN route_segments rs ON se.route_id = rs.route_id " +
@@ -30,12 +32,15 @@ public class TripDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setTime(1, Time.valueOf(SimulationController.getInstance().getVirtualTime()));
+
             count++;
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     String name = rs.getString("train_name");
                     int startId = rs.getInt("from_station_id");
                     int endId = rs.getInt("to_station_id");
+                    int finalStationId = rs.getInt("final_station_id");
+
 
                     // Umwandlung von SQL Timestamp zu Java LocalDateTime
                     Timestamp depTimestamp = rs.getTimestamp("segment_dep");
@@ -53,11 +58,13 @@ public class TripDAO {
                                 startStation,
                                 endStation,
                                 depTimestamp.toLocalDateTime(),
-                                arrTimestamp.toLocalDateTime()
+                                arrTimestamp.toLocalDateTime(),
+                                finalStationId
+
                         );
                         activeTrains.add(train);
 
-                        System.out.println(count + ": Zug " + name + " geladen.");
+//                        System.out.println(count + ": Zug " + name + " geladen.");
                     }
                 }
             }
