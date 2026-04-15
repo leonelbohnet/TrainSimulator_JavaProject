@@ -1,0 +1,32 @@
+package de.drvbund.lernlabit.lb.javaproject;
+
+import java.time.LocalTime;
+
+public class SimulationController {
+    private static SimulationController instance;
+    private LocalTime virtualTime = LocalTime.of(12, 0);
+    private double speedFactor = 1.0;
+
+    private SimulationController() {
+    }
+
+    public static SimulationController getInstance() {
+        if (instance == null) {
+            instance = new SimulationController();
+        }
+        return instance;
+    }
+
+    public void tick (long elapsedMillisReal){
+        long nanosToAdd = (long) (elapsedMillisReal * 1000000 * speedFactor);
+        virtualTime = virtualTime.plusNanos(nanosToAdd);
+    }
+
+    public LocalTime getVirtualTime(){
+        return virtualTime;
+    }
+
+    public void setSpeedFactor(double speedFactor) {
+        this.speedFactor = speedFactor;
+    }
+}

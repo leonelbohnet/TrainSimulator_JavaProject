@@ -20,12 +20,16 @@ public class MapPanel extends JPanel {
     private TripDAO tripDAO = new TripDAO();
 
 
+
     public MapPanel(List<Station> stations, List<TrackSegment> segments) {
         this.segments = segments;
         this.stationMap = stations.stream().collect(Collectors.toMap(Station::getId, s -> s));
         this.activeTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
 
-        animationTimer = new Timer(16, e -> repaint());
+        animationTimer = new Timer(16, e -> {
+            SimulationController.getInstance().tick(16);
+            repaint();
+        });
         animationTimer.start();
 
         dataRefreshTimer = new Timer(1000, e -> {
