@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.LocalTime;
 
 public class AnimatedTrain {
     private String name;
@@ -22,9 +23,13 @@ public class AnimatedTrain {
     }
 
     public double getProgress() {
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(departureTime)) return 0.0;
-        if (now.isAfter(arrivalTime)) return 1.0;
+        LocalTime now = LocalTime.now();
+        LocalTime dep = departureTime.toLocalTime();
+        LocalTime arr = arrivalTime.toLocalTime();
+
+
+        if (now.isBefore(dep)) return 0.0;
+        if (now.isAfter(arr)) return 1.0;
 
         long totalDuration = Duration.between(departureTime, arrivalTime).toMillis();
         long elapsedDuration = Duration.between(departureTime, now).toMillis();
