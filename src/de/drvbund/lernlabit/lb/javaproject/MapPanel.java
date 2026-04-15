@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -95,6 +96,10 @@ public class MapPanel extends JPanel {
             g.fillOval((int) pos.x - 5, (int) pos.y - 5, 10, 10);
             g.drawString(train.getName(), (int) pos.x + 10, (int) pos.y);
         }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String timeStr = SimulationController.getInstance().getVirtualTime().format(formatter);
+        g2d.drawString("Sim-Zeit: " + timeStr, getWidth() - 150, 20);
     }
 
 }

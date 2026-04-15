@@ -23,17 +23,30 @@ public class AnimatedTrain {
     }
 
     public double getProgress() {
-        LocalTime virtualTime = SimulationController.getInstance().getVirtualTime();
+        LocalTime simTime = SimulationController.getInstance().getVirtualTime();
+
+        // Aktuelle Position in der Stunde (0 - 3599 Sekunden)
+        long nowInHour = (simTime.getMinute() * 60) + simTime.getSecond();
+
         LocalTime dep = departureTime.toLocalTime();
         LocalTime arr = arrivalTime.toLocalTime();
 
-        if (virtualTime.isBefore(dep)) return 0.0;
-        if (virtualTime.isAfter(arr)) return 1.0;
+        // Geplante Zeiten in der Stunde
+        long depInHour = (dep.getMinute() * 60) + dep.getSecond();
+        long arrInHour = (arr.getMinute() * 60) + arr.getSecond();
 
-        long total = Duration.between(dep, arr).toMillis();
-        long elapsed = Duration.between(dep, virtualTime).toMillis();
+        // Falls die aktuelle Sim-Zeit noch vor der Abfahrtsminute liegt
+        if (nowInHour < depInHour) return 0.0;
+        // Falls sie schon nach der Ankunftsminute liegt
+        if (nowInHour > arrInHour) return 1.0;
 
-        return (double) elapsed / total;
+        long totalDuration = arrInHour - depInHour;
+        long elapsed = nowInHour - depInHour;
+
+        if (totalDuration <= 0) return 1.0;
+
+        // Fortschritt berechnen (Die Beschleunigung steckt bereits im SimulationController)
+        return (double) elapsed / totalDuration;
     }
 
     public Point2D.Double getCurrentPosition() {

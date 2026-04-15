@@ -4,8 +4,8 @@ import java.time.LocalTime;
 
 public class SimulationController {
     private static SimulationController instance;
-    private LocalTime virtualTime = LocalTime.of(12, 0);
-    private double speedFactor = 1.0;
+    private LocalTime virtualTime = LocalTime.of(18, 0);
+    private double speedFactor = 1000.0;
 
     private SimulationController() {
     }
