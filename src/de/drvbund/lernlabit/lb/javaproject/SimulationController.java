@@ -29,4 +29,8 @@ public class SimulationController {
     public void setSpeedFactor(double speedFactor) {
         this.speedFactor = speedFactor;
     }
+
+    public double getSpeedFactor() {
+        return speedFactor;
+    }
 }

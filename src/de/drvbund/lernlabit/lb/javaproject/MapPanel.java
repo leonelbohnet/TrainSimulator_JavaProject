@@ -33,7 +33,7 @@ public class MapPanel extends JPanel {
         });
         animationTimer.start();
 
-        dataRefreshTimer = new Timer(1000, e -> {
+        dataRefreshTimer = new Timer(5000/(int) SimulationController.getInstance().getSpeedFactor(), e -> {
             this.activeTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
         });
         dataRefreshTimer.start();
