@@ -14,12 +14,12 @@ public class TripDAO {
         String sql = "SELECT t.name, tr.start_station_id, tr.end_station_id, " +
                 "tr.scheduled_departure, tr.scheduled_arrival " +
                 "FROM trips tr JOIN trains t ON tr.train_id = t.id " +
-                "WHERE ? BETWEEN tr.scheduled_departure AND tr.scheduled_arrival";
+                "WHERE TIME(?) BETWEEN TIME(tr.scheduled_departure) AND TIME(tr.scheduled_arrival)";
 
         try (Connection connection = DatabaseManager.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setTime(1, Time.valueOf(LocalDateTime.now().toLocalTime()));
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
