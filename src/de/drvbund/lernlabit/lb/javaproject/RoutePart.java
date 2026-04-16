@@ -1,24 +1,25 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
 import java.time.LocalTime;
-import java.util.List;
 
 public class RoutePart {
-    private String route_name;
     private String train_name;
-    private int startStationId;
-    private int endStationId;
+    private String route_name;
+    private int fromStationId;
+    private int toStationId;
     private LocalTime departureTime;
     private LocalTime arrivalTime;
+    private double price;
 
 
-    public RoutePart(String routeName, String trainName, int startStationId, int endStationId, LocalTime departureTime, LocalTime arrivalTime) {
+    public RoutePart(String trainName, String routeName, int startStationId, int endStationId, LocalTime departureTime, LocalTime arrivalTime, double price) {
         route_name = routeName;
         train_name = trainName;
-        this.startStationId = startStationId;
-        this.endStationId = endStationId;
+        this.fromStationId = startStationId;
+        this.toStationId = endStationId;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
+        this.price = price;
     }
 
     public String getRoute_name() {
@@ -29,12 +30,12 @@ public class RoutePart {
         return train_name;
     }
 
-    public int getStartStationId() {
-        return startStationId;
+    public int getFromStationId() {
+        return fromStationId;
     }
 
-    public int getEndStationId() {
-        return endStationId;
+    public int getToStationId() {
+        return toStationId;
     }
 
     public LocalTime getDepartureTime() {
@@ -43,5 +44,9 @@ public class RoutePart {
 
     public LocalTime getArrivalTime() {
         return arrivalTime;
+    }
+
+    public double getPrice() {
+        return price;
     }
 }

@@ -44,29 +44,33 @@ public class BookingPanel extends JPanel {
         add(new JScrollPane(resultTable), BorderLayout.CENTER);
 
         searchBtn.addActionListener(e -> {
-            Station start = (Station) startCombo.getSelectedItem();
-            Station end = (Station) endCombo.getSelectedItem();
+        Station start = (Station) startCombo.getSelectedItem();
+        Station end = (Station) endCombo.getSelectedItem();
 
-            if(start != null && end != null){
-                List<RouteOption> options = routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
-                System.out.println("DEBUG: " + options);
-                tableModel.setRowCount(0);
-                if(options.isEmpty()){
-                    JOptionPane.showMessageDialog(this, "Keine direkten Verbindungen gefunden.");
-                } else {
-                    for (RouteOption option : options) {
-                        tableModel.addRow(new Object[]{
-                                option.getRoute_name(),
-                                option.getTrain_name(),
-                                option.getDepartureTime(),
-                                option.getArrivalTime(),
-                                option.getTotalDuration() + " Min",
-                                String.format("%.2f €", option.getTotalPrice())
-                        });
-                    }
-                }
+        if ((start !=null) && (end != null) && (start != end)){
+            List<RouteOption> options = routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
+            tableModel.setRowCount(0);
+
+            if(options.isEmpty()){
+                JOptionPane.showMessageDialog(this, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Bitte wählen Sie einen Start- und Endbahnhof aus.");
+                for (RouteOption option : options) {
+                    String trains = option.getParts().stream()
+                            .map(RoutePart::getTrain_name)
+                            .reduce((a, b) -> a + " ➔ " + b)
+                            .orElse("-");
+
+                    String routes = option.getParts().stream()
+                            .map(RoutePart::getRoute_name)
+                            .distinct()
+                            .reduce((a, b) -> a + " , " + b)
+                            .orElse("-");
+
+
+
+
+                }
+            }
             }
         });
     }
