@@ -32,4 +32,9 @@ public class Station {
         return transfer_time_min;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }
