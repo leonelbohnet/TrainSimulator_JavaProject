@@ -11,8 +11,8 @@ public class RouteOptionDAO {
         Map<Integer, List<Integer>> graph = loadGraph();
         List<List<Integer>> possiblePaths = findAllPaths(startId, endId, graph);
 
-//        System.out.println("DEBUG: Geografische Pfade gefunden: " + possiblePaths.size());
-//        for(List<Integer> p : possiblePaths) System.out.println("Pfad: " + p);
+        System.out.println("DEBUG: Geografische Pfade gefunden: " + possiblePaths.size());
+        for(List<Integer> p : possiblePaths) System.out.println("Pfad: " + p);
 
         for (List<Integer> path : possiblePaths) {
             findCombinations(path, 0, startTime, new ArrayList<>(), options);
@@ -41,27 +41,50 @@ public class RouteOptionDAO {
 
     private List<RoutePart> getPartsForSegment(int from, int to, LocalTime currentTime) {
         List<RoutePart> parts = new ArrayList<>();
+
+        String sqlTest = "SELECT t.name AS train_name, r.route_name, " +
+                "ADDTIME(se.departure_time, SEC_TO_TIME(rs_start.offset_minutes * 60)) AS dep, " +
+                "ADDTIME(se.departure_time, SEC_TO_TIME((rs_end.offset_minutes + rs_end.duration_minutes) * 60)) AS arr, " +
+                "10.0 AS price " +
+                "FROM routes r " +
+                "JOIN route_segments rs_start ON r.id = rs_start.route_id " +
+                "JOIN route_segments rs_end ON r.id = rs_end.route_id " +
+                "JOIN schedule_entries se ON r.id = se.route_id " +
+                "JOIN trains t ON se.train_id = t.id " +
+                "WHERE rs_start.from_station_id = ? " + // Parameter 1
+                "AND rs_end.to_station_id = ? " +      // Parameter 2
+                "AND rs_start.route_id = rs_end.route_id " + // Sicherstellen, dass es die gleiche Linie ist
+                "AND rs_start.stop_order <= rs_end.stop_order"; // Erlaubt Start = Ziel Segment
+
+
         String sql = "SELECT t.name AS train_name, r.route_name, " +
                 "ADDTIME(se.departure_time, SEC_TO_TIME(rs_start.offset_minutes * 60)) AS dep, " +
                 "ADDTIME(se.departure_time, SEC_TO_TIME((rs_end.offset_minutes + rs_end.duration_minutes) * 60)) AS arr, " +
                 "(SELECT SUM(ts.price_factor) * tt.price_factor FROM route_segments rs3 " +
-                " JOIN track_segments ts ON ((rs3.from_station_id = ts.station_a_id AND rs3.to_station_id = ts.station_b_id) " +
-                " OR (rs3.from_station_id = ts.station_b_id AND rs3.to_station_id = ts.station_a_id)) " +
-                " WHERE rs3.route_id = r.id AND rs3.stop_order BETWEEN rs_start.stop_order AND rs_end.stop_order) AS price " +
+                "JOIN track_segments ts ON ((rs3.from_station_id = ts.station_a_id AND rs3.to_station_id = ts.station_b_id) " +
+                "OR (rs3.from_station_id = ts.station_b_id AND rs3.to_station_id = ts.station_a_id)) " +
+                "WHERE rs3.route_id = r.id AND rs3.stop_order BETWEEN rs_start.stop_order AND rs_end.stop_order) AS price " +
                 "FROM routes r " +
                 "JOIN route_segments rs_start ON r.id = rs_start.route_id " +
                 "JOIN route_segments rs_end ON r.id = rs_end.route_id " +
                 "JOIN schedule_entries se ON r.id = se.route_id " +
                 "JOIN trains t ON se.train_id = t.id " +
                 "JOIN train_types tt ON t.type_id = tt.id " +
-                "WHERE rs_start.from_station_id = ? AND rs_end.to_station_id = ? " +
-                "AND rs_start.stop_order < rs_end.stop_order " +
-                "AND ADDTIME(se.departure_time, SEC_TO_TIME(rs_start.offset_minutes * 60)) >= ?";
+                "WHERE rs_start.from_station_id = ? " +
+                "AND rs_end.to_station_id = ? " +
+                "AND rs_start.route_id = rs_end.route_id " +
+                "AND rs_start.stop_order <= rs_end.stop_order " +
+                "AND ADDTIME(se.departure_time, SEC_TO_TIME(rs_start.offset_minutes * 60)) >= ? " +
+                "ORDER BY dep ASC";
+
+        // In deinem DAO vor pstmt = conn.prepareStatement(sql):
+        System.out.println("DEBUG SQL: " + sql);
+
         try (Connection conn = DatabaseManager.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, from);
             pstmt.setInt(2, to);
-            pstmt.setTime(3, Time.valueOf(currentTime));
+            pstmt.setTime(3, Time.valueOf(LocalTime.of(0, 0)));
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     parts.add(new RoutePart(
@@ -74,6 +97,7 @@ public class RouteOptionDAO {
                             rs.getDouble("price")
                     ));
                 }
+                System.out.println("DEBUG: Segment " + from + " -> " + to + ": " + parts.size() + " Züge gefunden.");
             }
         } catch (SQLException e) {
             e.printStackTrace();

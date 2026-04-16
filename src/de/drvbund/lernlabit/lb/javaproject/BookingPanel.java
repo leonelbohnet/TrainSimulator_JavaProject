@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,7 +32,7 @@ public class BookingPanel extends JPanel {
 
         add(searchBar, BorderLayout.NORTH);
 
-        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Dauer", "Umstiege", "Preis"};
+        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Streckenverlauf", "Dauer", "Umstiege", "Preis"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -55,23 +56,24 @@ public class BookingPanel extends JPanel {
                     JOptionPane.showMessageDialog(this, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     for (RouteOption option : options) {
-                        String trains = option.getParts().stream()
-                                .map(RoutePart::getTrain_name)
-                                .reduce((a, b) -> a + " ➔ " + b)
-                                .orElse("-");
+                        List<String> distinctTrains = new ArrayList<>();
+                        distinctTrains.add(option.getParts().get(0).getTrain_name());
 
-                        String routes = option.getParts().stream()
-                                .map(RoutePart::getRoute_name)
-                                .distinct()
-                                .reduce((a, b) -> a + " , " + b)
-                                .orElse("-");
+                        for (int i = 1; i < option.getParts().size(); i++) {
+                            String currentTrain = option.getParts().get(i).getTrain_name();
+                            if (!currentTrain.equals(option.getParts().get(i - 1).getTrain_name())) {
+                                distinctTrains.add(currentTrain);
+                            }
+                        }
+                        String trainChain = String.join(" ➔ ", distinctTrains);
 
                         tableModel.addRow(new Object[]{
-                                routes,
-                                trains,
+                                option.getParts().get(0).getRoute_name(),
+                                trainChain,
                                 option.getStartTime(),
                                 option.getEndTime(),
-                                option.getTotalDuration() + " Min",
+                                option.getStationPath(stations),
+                                option.getTotalDuration(),
                                 option.getTransferCount(),
                                 String.format("%.2f €", option.getTotalPrice())
                         });
