@@ -1,5 +1,6 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class RouteOption {
 
     public LocalTime getEndTime(){
         return parts.get(parts.size() - 1).getArrivalTime();
+    }
+
+    public int getTotalDuration(){
+        return (int) Duration.between(getStartTime(), getEndTime()).toMinutes();
     }
 
     public double getTotalPrice(){

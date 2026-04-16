@@ -5,7 +5,7 @@ import java.time.LocalTime;
 public class SimulationController {
     private static SimulationController instance;
     private LocalTime virtualTime = LocalTime.of(6, 0);
-    private double speedFactor = 100.0;
+    private double speedFactor = 10.0;
 
     private SimulationController() {
     }

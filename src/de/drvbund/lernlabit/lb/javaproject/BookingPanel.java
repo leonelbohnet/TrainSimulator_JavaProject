@@ -31,7 +31,7 @@ public class BookingPanel extends JPanel {
 
         add(searchBar, BorderLayout.NORTH);
 
-        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Dauer", "Preis"};
+        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Dauer", "Umstiege", "Preis"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -44,33 +44,45 @@ public class BookingPanel extends JPanel {
         add(new JScrollPane(resultTable), BorderLayout.CENTER);
 
         searchBtn.addActionListener(e -> {
-        Station start = (Station) startCombo.getSelectedItem();
-        Station end = (Station) endCombo.getSelectedItem();
+            Station start = (Station) startCombo.getSelectedItem();
+            Station end = (Station) endCombo.getSelectedItem();
 
-        if ((start !=null) && (end != null) && (start != end)){
-            List<RouteOption> options = routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
-            tableModel.setRowCount(0);
+            if ((start != null) && (end != null) && (start != end)) {
+                List<RouteOption> options = routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
+                tableModel.setRowCount(0);
 
-            if(options.isEmpty()){
-                JOptionPane.showMessageDialog(this, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                for (RouteOption option : options) {
-                    String trains = option.getParts().stream()
-                            .map(RoutePart::getTrain_name)
-                            .reduce((a, b) -> a + " ➔ " + b)
-                            .orElse("-");
+                if (options.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    for (RouteOption option : options) {
+                        String trains = option.getParts().stream()
+                                .map(RoutePart::getTrain_name)
+                                .reduce((a, b) -> a + " ➔ " + b)
+                                .orElse("-");
 
-                    String routes = option.getParts().stream()
-                            .map(RoutePart::getRoute_name)
-                            .distinct()
-                            .reduce((a, b) -> a + " , " + b)
-                            .orElse("-");
+                        String routes = option.getParts().stream()
+                                .map(RoutePart::getRoute_name)
+                                .distinct()
+                                .reduce((a, b) -> a + " , " + b)
+                                .orElse("-");
 
-
-
-
+                        tableModel.addRow(new Object[]{
+                                routes,
+                                trains,
+                                option.getStartTime(),
+                                option.getEndTime(),
+                                option.getTotalDuration() + " Min",
+                                option.getTransferCount(),
+                                String.format("%.2f €", option.getTotalPrice())
+                        });
+                    }
                 }
-            }
+            } else {
+                if (start == end) {
+                    JOptionPane.showMessageDialog(this, "Start- und Endpunkt dürfen nicht gleich sein!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Bitte wählen Sie einen Start- und Endpunkt aus!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         });
     }
