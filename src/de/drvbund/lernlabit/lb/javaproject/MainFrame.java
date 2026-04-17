@@ -6,7 +6,7 @@ import java.util.List;
 public class MainFrame extends JFrame {
     public MainFrame() {
         setTitle("TrainSimulator - Live Map");
-        setSize(1800, 1000);
+        setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -19,7 +19,7 @@ public class MainFrame extends JFrame {
         BookingPanel bookingPanel = new BookingPanel(stations);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mapPanel, bookingPanel);
-        splitPane.setDividerLocation(400);
+        splitPane.setDividerLocation(800);
         add(splitPane);
     }
 }

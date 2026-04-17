@@ -30,7 +30,7 @@ public class SimulationController {
         this.speedFactor = speedFactor;
     }
 
-    public double getSpeedFactor() {
-        return speedFactor;
+    public int getSpeedFactor() {
+        return (int) speedFactor;
     }
 }

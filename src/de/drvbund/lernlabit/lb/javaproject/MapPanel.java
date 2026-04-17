@@ -33,7 +33,7 @@ public class MapPanel extends JPanel {
         });
         animationTimer.start();
 
-        dataRefreshTimer = new Timer(500, e -> {
+        dataRefreshTimer = new Timer(300, e -> {
             List<AnimatedTrain> sqlTrains = tripDAO.getCurrentlyRunningTrips(stationMap);
 
             // 1. Neue Segmente in bestehende Züge einspielen
@@ -62,6 +62,22 @@ public class MapPanel extends JPanel {
 
         setPreferredSize(new Dimension(800, 600));
         setBackground(new Color(240, 240, 240));
+
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JSlider speedSlider = new JSlider(JSlider.HORIZONTAL, 0, 300, SimulationController.getInstance().getSpeedFactor());
+        speedSlider.setMajorTickSpacing(50);
+        speedSlider.setMinorTickSpacing(25);
+        speedSlider.setPaintTicks(true);
+        JLabel speedLabel = new JLabel("Geschwindigkeit: " + SimulationController.getInstance().getSpeedFactor() + "x");
+        speedSlider.addChangeListener(e -> {
+            int factor = speedSlider.getValue();
+            SimulationController.getInstance().setSpeedFactor(factor);
+            speedLabel.setText("Geschwindigkeit: " + factor + "x");
+        });
+
+        controlPanel.add(speedSlider);
+        controlPanel.add(speedLabel);
+        add(controlPanel, BorderLayout.SOUTH);
     }
 
     @Override
