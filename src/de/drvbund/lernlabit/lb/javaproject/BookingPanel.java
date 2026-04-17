@@ -1,7 +1,10 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -32,16 +35,21 @@ public class BookingPanel extends JPanel {
 
         add(searchBar, BorderLayout.NORTH);
 
-        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Streckenverlauf", "Dauer", "Umstiege", "Preis"};
+        String[] columns = {"Route", "Zug", "Abfahrt", "Ankunft", "Dauer", "Umstiege", "Preis"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
-
-            ;
         };
         resultTable = new JTable(tableModel);
+
+        setColumnAlignment(2, SwingConstants.RIGHT, resultTable);
+        setColumnAlignment(3, SwingConstants.RIGHT, resultTable);
+        setColumnAlignment(4, SwingConstants.RIGHT, resultTable);
+        setColumnAlignment(5, SwingConstants.RIGHT, resultTable);
+        setColumnAlignment(6, SwingConstants.RIGHT, resultTable);
+
         add(new JScrollPane(resultTable), BorderLayout.CENTER);
 
         searchBtn.addActionListener(e -> {
@@ -68,12 +76,11 @@ public class BookingPanel extends JPanel {
                         String trainChain = String.join(" ➔ ", distinctTrains);
 
                         tableModel.addRow(new Object[]{
-                                option.getParts().get(0).getRoute_name(),
+                                option.getStationPath(stations),
                                 trainChain,
                                 option.getStartTime(),
                                 option.getEndTime(),
-                                option.getStationPath(stations),
-                                option.getTotalDuration(),
+                                option.getFormattedDuration(),
                                 option.getTransferCount(),
                                 String.format("%.2f €", option.getTotalPrice())
                         });
@@ -86,6 +93,27 @@ public class BookingPanel extends JPanel {
                     JOptionPane.showMessageDialog(this, "Bitte wählen Sie einen Start- und Endpunkt aus!", "Info", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
+            resizeColumnWidth(resultTable);
         });
+    }
+
+    public void resizeColumnWidth(JTable table){
+        final TableColumnModel columnModel = table.getColumnModel();
+        for (int column = 0; column < table.getColumnCount(); column++){
+            int width = 15;
+            for (int row = 0; row < table.getRowCount(); row++){
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+                width = Math.max(comp.getPreferredSize().width +1, width);
+            }
+            if (width > 400) width = 400;
+            columnModel.getColumn(column).setPreferredWidth(width);
+        }
+    }
+
+    public void setColumnAlignment(int colIndex, int alignment, JTable table){
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setHorizontalAlignment(alignment);
+        table.getColumnModel().getColumn(colIndex).setCellRenderer(renderer);
     }
 }

@@ -25,12 +25,27 @@ public class RouteOption {
         return parts.get(parts.size() - 1).getArrivalTime();
     }
 
-    public int getTotalDuration() {
-        return (int) Duration.between(getStartTime(), getEndTime()).toMinutes();
+    public String getFormattedDuration() {
+        LocalTime startTime = getStartTime();
+        LocalTime endTime = getEndTime();
+
+        Duration duration = Duration.between(startTime, endTime);
+
+        if (duration.isNegative()) {
+            duration = duration.plusDays(1);
+        }
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+
+        if (hours > 0) {
+            return String.format("%02d Std. %02d Min.", hours, minutes);
+        } else {
+            return String.format("%02d Min.", minutes);
+        }
     }
 
     public double getTotalPrice() {
-        return parts.stream().mapToDouble(RoutePart::getPrice).sum();
+        return parts.stream().mapToDouble(RoutePart::getPrice).sum()*12;
     }
 
     public int getTransferCount() {
@@ -58,7 +73,7 @@ public class RouteOption {
                 .collect(Collectors.joining(" ➔ "));
     }
 
-    public String findStationName (int id, List<Station> stations){
+    public String findStationName(int id, List<Station> stations) {
         return stations.stream()
                 .filter(s -> s.getId() == id)
                 .map(Station::getName)
