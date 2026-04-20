@@ -64,8 +64,8 @@ public class MapPanel extends JPanel {
 
         dataRefreshTimer.start();
 
-        setPreferredSize(new Dimension(800, 600));
-        setBackground(new Color(240, 240, 240));
+//        setPreferredSize(new Dimension(800, 600));
+//        setBackground(new Color(240, 240, 240));
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JSlider speedSlider = new JSlider(JSlider.HORIZONTAL, 0, 300, SimulationController.getInstance().getSpeedFactor());
@@ -82,6 +82,16 @@ public class MapPanel extends JPanel {
         controlPanel.add(speedSlider);
         controlPanel.add(speedLabel);
         add(controlPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public Dimension getPreferredSize(){
+// Finde die maximalen Koordinaten deiner Stationen
+        int maxX = stationMap.values().stream().mapToInt(s -> (int)s.getX_coordinate()).max().orElse(800);
+        int maxY = stationMap.values().stream().mapToInt(s -> (int)s.getY_coordinate()).max().orElse(600);
+
+        // + 80 für das Padding (40px an jeder Seite)
+        return new Dimension(maxX + 100, maxY + 100);
     }
 
     @Override
