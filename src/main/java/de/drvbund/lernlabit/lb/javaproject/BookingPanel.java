@@ -1,5 +1,7 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -16,9 +18,12 @@ public class BookingPanel extends JPanel {
     private JTable resultTable;
     private DefaultTableModel tableModel;
     private RouteOptionDAO routeOptionDAO = new RouteOptionDAO();
-    private JLabel loadingLabel;
+    private RotatebleIconLabel loadingLabel;
+    private Timer rotationTimer;
+    private List<Station> allStations;
 
     public BookingPanel(List<Station> stations) {
+        this.allStations = stations;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -26,10 +31,10 @@ public class BookingPanel extends JPanel {
         startCombo = new JComboBox<>(stations.toArray(new Station[0]));
         endCombo = new JComboBox<>(stations.toArray(new Station[0]));
         JButton searchBtn = new JButton("Verbindungen suchen");
-        loadingLabel = new JLabel("Lade Verbindungen...", SwingConstants.CENTER);
-//        ImageIcon loadingIcon = getScaledIcon("assets/Rolling@1x-1.0s-200px-200px.gif", 240, 240);
-        loadingLabel.setIcon(new ImageIcon(getClass().getResource("/icons/Rolling@1x-1.0s-25px-25px.svg")));
-        loadingLabel.setVisible(true);
+
+        FlatSVGIcon svgIcon = new FlatSVGIcon("icons/Rolling@1x-1.0s-25px-25px.svg", 24, 24);
+        loadingLabel = new RotatebleIconLabel(svgIcon);
+        loadingLabel.setVisible(false);
 
 
         searchBar.add(new JLabel("Von:"));
@@ -38,6 +43,10 @@ public class BookingPanel extends JPanel {
         searchBar.add(endCombo);
         searchBar.add(searchBtn);
         searchBar.add(loadingLabel);
+
+        rotationTimer = new Timer(30, e -> {
+            loadingLabel.setAngle(loadingLabel.getAngle() + 10);
+        });
 
 
         add(searchBar, BorderLayout.NORTH);
@@ -79,52 +88,73 @@ public class BookingPanel extends JPanel {
 
         add(new JScrollPane(resultTable), BorderLayout.CENTER);
 
-        searchBtn.addActionListener(e -> {
-            Station start = (Station) startCombo.getSelectedItem();
-            Station end = (Station) endCombo.getSelectedItem();
-
-            if ((start != null) && (end != null) && (start != end)) {
-                List<RouteOption> options = routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
-                tableModel.setRowCount(0);
-
-                if (options.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    for (RouteOption option : options) {
-                        List<String> distinctTrains = new ArrayList<>();
-                        distinctTrains.add(option.getParts().get(0).getTrain_name());
-
-                        for (int i = 1; i < option.getParts().size(); i++) {
-                            String currentTrain = option.getParts().get(i).getTrain_name();
-                            if (!currentTrain.equals(option.getParts().get(i - 1).getTrain_name())) {
-                                distinctTrains.add(currentTrain);
-                            }
-                        }
-                        String trainChain = String.join(" ➔ ", distinctTrains);
-
-                        tableModel.addRow(new Object[]{
-                                option.getStationPath(stations),
-                                trainChain,
-                                option.getStartTime(),
-                                option.getEndTime(),
-                                option.getFormattedDuration(),
-                                option.getTransferCount(),
-                                String.format("%.2f €", option.getTotalPrice())
-                        });
-                    }
-                }
-            } else {
-                if (start == end) {
-                    JOptionPane.showMessageDialog(this, "Start- und Endpunkt dürfen nicht gleich sein!", "Info", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Bitte wählen Sie einen Start- und Endpunkt aus!", "Info", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-            resizeColumnWidth(resultTable);
-        });
+        searchBtn.addActionListener(e -> performSearch(searchBtn));
     }
 
-    public ImageIcon getScaledIcon(String path, int width, int height){
+    public void performSearch(JButton searchBtn){
+        Station start = (Station) startCombo.getSelectedItem();
+        Station end = (Station) endCombo.getSelectedItem();
+
+        if(start == null || end == null || start.equals(end)){
+            JOptionPane.showMessageDialog(this, "Bitte gültige Stationen wählen!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        loadingLabel.setVisible(true);
+        rotationTimer.start();
+        searchBtn.setEnabled(false);
+        tableModel.setRowCount(0);
+
+        new SwingWorker<List<RouteOption>, Void>(){
+            @Override
+            protected List<RouteOption> doInBackground() throws Exception {
+                return routeOptionDAO.findAvailableRoutes(start.getId(), end.getId(), SimulationController.getInstance().getVirtualTime());
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<RouteOption> options = get();
+                    if (options.isEmpty()){
+                        JOptionPane.showMessageDialog(null, "Keine Verbindungen gefunden!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        for (RouteOption option : options) {
+                            tableModel.addRow(new Object[]{
+                                  option.getStationPath(allStations),
+                                  formatTrainChain(option),
+                                  option.getStartTime(),
+                                  option.getEndTime(),
+                                  option.getFormattedDuration(),
+                                  option.getTransferCount(),
+                                  String.format("%.2f €", option.getTotalPrice())
+                          });
+                        }
+                        resizeColumnWidth(resultTable);
+                    }
+                } catch (Exception ex){
+                    JOptionPane.showMessageDialog(null, "Fehler beim Laden der Daten!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    loadingLabel.setVisible(false);
+                    rotationTimer.stop();
+                    searchBtn.setEnabled(true);
+                }
+            }
+        }.execute();
+    }
+
+    private String formatTrainChain(RouteOption option){
+        List<String> distinctTrains = new ArrayList<>();
+        distinctTrains.add(option.getParts().get(0).getTrain_name());
+        for (int i = 1; i < option.getParts().size(); i++) {
+            String currentTrain = option.getParts().get(i).getTrain_name();
+            if (!currentTrain.equals(option.getParts().get(i - 1).getTrain_name())) {
+                distinctTrains.add(currentTrain);
+            }
+        }
+        return String.join(" ➔ ", distinctTrains);
+    }
+
+    public ImageIcon getScaledIcon(String path, int width, int height) {
         ImageIcon icon = new ImageIcon(getClass().getResource(path));
         Image img = icon.getImage();
         Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
