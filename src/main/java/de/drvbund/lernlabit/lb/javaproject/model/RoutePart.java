@@ -1,4 +1,4 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.model;
 
 import java.time.LocalTime;
 

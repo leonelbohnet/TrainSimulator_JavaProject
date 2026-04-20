@@ -1,6 +1,11 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.view;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import de.drvbund.lernlabit.lb.javaproject.dataAccess.RouteOptionDAO;
+import de.drvbund.lernlabit.lb.javaproject.model.RotatebleIconLabel;
+import de.drvbund.lernlabit.lb.javaproject.model.RouteOption;
+import de.drvbund.lernlabit.lb.javaproject.controller.SimulationController;
+import de.drvbund.lernlabit.lb.javaproject.model.Station;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -154,13 +159,6 @@ public class BookingPanel extends JPanel {
         return String.join(" ➔ ", distinctTrains);
     }
 
-    public ImageIcon getScaledIcon(String path, int width, int height) {
-        ImageIcon icon = new ImageIcon(getClass().getResource(path));
-        Image img = icon.getImage();
-        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImg);
-    }
-
     public void resizeColumnWidth(JTable table) {
         final TableColumnModel columnModel = table.getColumnModel();
         for (int column = 0; column < table.getColumnCount(); column++) {
@@ -176,9 +174,22 @@ public class BookingPanel extends JPanel {
     }
 
     public void setColumnAlignment(int colIndex, int alignment, JTable table) {
-        TableCellRenderer existingRenderer = resultTable.getColumnModel().getColumn(colIndex).getCellRenderer();
-        if (existingRenderer instanceof DefaultTableCellRenderer) {
-            ((DefaultTableCellRenderer) existingRenderer).setHorizontalAlignment(alignment);
-        }
+//        TableCellRenderer existingRenderer = resultTable.getColumnModel().getColumn(colIndex).getCellRenderer();
+//        if (existingRenderer instanceof DefaultTableCellRenderer) {
+//            ((DefaultTableCellRenderer) existingRenderer).setHorizontalAlignment(alignment);
+//        }
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer(){
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if(!isSelected){
+                    comp.setBackground(row % 2 == 0 ? new Color(60, 63, 65) : new Color(45, 47, 49));
+                }
+                return comp;
+            }
+        };
+        customRenderer.setHorizontalAlignment(alignment);
+        resultTable.getColumnModel().getColumn(colIndex).setCellRenderer(customRenderer);
     }
 }

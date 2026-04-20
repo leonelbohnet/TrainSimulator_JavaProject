@@ -1,4 +1,9 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.view;
+
+import de.drvbund.lernlabit.lb.javaproject.dataAccess.StationDAO;
+import de.drvbund.lernlabit.lb.javaproject.dataAccess.TrackSegmentDAO;
+import de.drvbund.lernlabit.lb.javaproject.model.Station;
+import de.drvbund.lernlabit.lb.javaproject.model.TrackSegment;
 
 import javax.swing.*;
 import java.util.List;

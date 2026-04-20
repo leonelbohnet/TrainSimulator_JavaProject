@@ -1,7 +1,11 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.dataAccess;
+
+import de.drvbund.lernlabit.lb.javaproject.model.AnimatedTrain;
+import de.drvbund.lernlabit.lb.javaproject.controller.DatabaseManager;
+import de.drvbund.lernlabit.lb.javaproject.controller.SimulationController;
+import de.drvbund.lernlabit.lb.javaproject.model.Station;
 
 import java.sql.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

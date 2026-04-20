@@ -1,4 +1,8 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.dataAccess;
+
+import de.drvbund.lernlabit.lb.javaproject.controller.DatabaseManager;
+import de.drvbund.lernlabit.lb.javaproject.model.RouteOption;
+import de.drvbund.lernlabit.lb.javaproject.model.RoutePart;
 
 import java.sql.*;
 import java.time.LocalTime;

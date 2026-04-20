@@ -1,9 +1,7 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLaf;
+import de.drvbund.lernlabit.lb.javaproject.view.MainFrame;
 
 
 public class Start {

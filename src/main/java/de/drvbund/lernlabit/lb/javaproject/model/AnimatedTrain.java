@@ -1,9 +1,9 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.model;
+
+import de.drvbund.lernlabit.lb.javaproject.controller.SimulationController;
 
 import java.awt.geom.Point2D;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Duration;
 import java.time.LocalTime;
 
 public class AnimatedTrain {

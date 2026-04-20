@@ -1,12 +1,16 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.view;
+
+import de.drvbund.lernlabit.lb.javaproject.model.AnimatedTrain;
+import de.drvbund.lernlabit.lb.javaproject.dataAccess.TripDAO;
+import de.drvbund.lernlabit.lb.javaproject.controller.SimulationController;
+import de.drvbund.lernlabit.lb.javaproject.model.Station;
+import de.drvbund.lernlabit.lb.javaproject.model.TrackSegment;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

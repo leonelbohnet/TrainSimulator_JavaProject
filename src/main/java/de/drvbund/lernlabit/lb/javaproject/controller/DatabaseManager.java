@@ -1,4 +1,4 @@
-package de.drvbund.lernlabit.lb.javaproject;
+package de.drvbund.lernlabit.lb.javaproject.controller;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
