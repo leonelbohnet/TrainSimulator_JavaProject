@@ -27,16 +27,19 @@ public class AnimatedTrain {
     public double getProgress() {
         LocalTime simTime = SimulationController.getInstance().getVirtualTime();
 
-        LocalTime dep = departureTime.toLocalTime();
-        LocalTime arr = arrivalTime.toLocalTime();
+        long nowSec = (simTime.getMinute() * 60L) + simTime.getSecond();
+        long depSec = (departureTime.getMinute() * 60L) + departureTime.getSecond();
+        long arrSec = (arrivalTime.getMinute() * 60L) + arrivalTime.getSecond();
 
-        long totalDurationMillis = Duration.between(dep, arr).toMillis();
-        long elapsedMillis = Duration.between(dep, simTime).toMillis();
+        long totalDuration = arrSec - depSec;
+        long elapsedTime = nowSec - depSec;
 
-        if(elapsedMillis < 0) return 0.0;
-        if(totalDurationMillis <= 0 || elapsedMillis >= totalDurationMillis) return 1.0;
+        if (totalDuration < 0) totalDuration += 3600;
+        if (elapsedTime < 0) elapsedTime += 3600;
 
-        return (double) elapsedMillis / totalDurationMillis;
+        if (totalDuration <= 0) return 1.0;
+        double progress = (double) elapsedTime / totalDuration;
+        return Math.max(0.0, Math.min(1.0, progress));
     }
 
     public Point2D.Double getCurrentPosition() {
