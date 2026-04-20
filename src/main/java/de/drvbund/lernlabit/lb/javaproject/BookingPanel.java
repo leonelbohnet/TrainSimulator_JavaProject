@@ -6,11 +6,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.formdev.flatlaf.FlatLaf;
 
 
 public class BookingPanel extends JPanel {
@@ -31,7 +28,7 @@ public class BookingPanel extends JPanel {
         JButton searchBtn = new JButton("Verbindungen suchen");
         loadingLabel = new JLabel("Lade Verbindungen...", SwingConstants.CENTER);
 //        ImageIcon loadingIcon = getScaledIcon("assets/Rolling@1x-1.0s-200px-200px.gif", 240, 240);
-        loadingLabel.setIcon(new ImageIcon(getClass().getResource("assets/Rolling@1x-1.0s-25px-25px.svg")));
+        loadingLabel.setIcon(new ImageIcon(getClass().getResource("/icons/Rolling@1x-1.0s-25px-25px.svg")));
         loadingLabel.setVisible(true);
 
 
