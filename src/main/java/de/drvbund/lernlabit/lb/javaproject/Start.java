@@ -1,6 +1,7 @@
 package de.drvbund.lernlabit.lb.javaproject;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import de.drvbund.lernlabit.lb.javaproject.view.MainFrame;
 
 /**
@@ -22,7 +23,7 @@ public class Start {
         // Initialize FlatLaf Dark Look and Feel for modern UI appearance
         FlatDarkLaf.setup();
         // Alternative themes available:
-        // FlatIntelliJLaf.setup();
+//         FlatIntelliJLaf.setup();
         // FlatDarculaLaf.setup();
 
         // Create and display the main application window

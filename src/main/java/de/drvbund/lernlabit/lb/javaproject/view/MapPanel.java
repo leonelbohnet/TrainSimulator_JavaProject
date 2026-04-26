@@ -126,18 +126,6 @@ public class MapPanel extends JPanel {
         FlatSVGIcon playIcon = new FlatSVGIcon("icons/play.svg", 30, 30);
         FlatSVGIcon pauseIcon = new FlatSVGIcon("icons/pause.svg", 30, 30);
 
-        // Alternative PNG icon loading code (commented out, kept for reference)
-        /*     playIcon = new ImageIcon(getClass().getResource("/icons/play-button.png"));
-        // pauseIcon = new ImageIcon(getClass().getResource("/icons/pause.png"));
-        Image img = playIcon.getImage();
-        Image newImg = img.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-        playIcon = new ImageIcon(newImg);
-
-        img = pauseIcon.getImage();
-        newImg = img.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-        pauseIcon = new ImageIcon(newImg);
-        */
-
         // Create control panel with simulation controls
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 5));
         controlPanel.setPreferredSize(new Dimension(800, 50));
@@ -170,6 +158,8 @@ public class MapPanel extends JPanel {
 
         // Play/Pause button: toggles simulation time
         playBtn = new JButton(pauseIcon);
+        playBtn.setBackground(null);
+        playBtn.setBorderPainted(false);
         playBtn.addActionListener(e -> {
             if (isPause) {
                 // Resume simulation

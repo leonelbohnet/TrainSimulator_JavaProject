@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"Alle Packages","u":"allpackages-index.html","k":"18"},{"l":"de.drvbund.lernlabit.lb.javaproject"},{"l":"de.drvbund.lernlabit.lb.javaproject.controller"},{"l":"de.drvbund.lernlabit.lb.javaproject.dataAccess"},{"l":"de.drvbund.lernlabit.lb.javaproject.model"},{"l":"de.drvbund.lernlabit.lb.javaproject.view"}];updateSearchResults();
